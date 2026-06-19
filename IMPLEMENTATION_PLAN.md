@@ -112,7 +112,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 8: API Routes & Main App ✅ Pending
+### STEP 8: API Routes & Main App ✅ COMPLETED
 **Files to create:**
 - `backend/app/routes/auth.py` — POST /api/auth/login
 - `backend/app/routes/chat.py` — POST /api/chat, /api/reset, /api/exit
@@ -123,7 +123,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 9: Document Ingestion & YouTube ✅ Pending
+### STEP 9: Document Ingestion & YouTube ✅ COMPLETED
 **Files to create:**
 - `backend/app/services/ingestion.py` — PDF chunking (PyMuPDF) + Pinecone upsert
 - `backend/app/services/youtube_extractor.py` — YouTube transcript extraction + PDF conversion (fpdf2)
@@ -132,7 +132,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 10: Frontend Chat Widget ✅ Pending
+### STEP 10: Frontend Chat Widget ✅ COMPLETED
 **Files to create:**
 - `frontend/index.html` — Demo page with chat widget
 - `frontend/css/style.css` — Premium glassmorphism dark-mode styling
