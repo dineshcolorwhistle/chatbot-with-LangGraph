@@ -68,7 +68,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 4: LLM & Embedding Services ✅ Pending
+### STEP 4: LLM & Embedding Services ✅ COMPLETED
 **Files to create:**
 - `backend/app/services/llm_service.py` — Dual LLM abstraction (Ollama + OpenAI), call_llm, call_llm_simple
 - `backend/app/services/embedding_service.py` — generate_embedding (OpenAI / Ollama)
@@ -77,7 +77,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 5: Pinecone & RAG Service ✅ Pending
+### STEP 5: Pinecone & RAG Service ✅ COMPLETED
 **Files to create:**
 - `backend/app/services/pinecone_service.py` — init_pinecone, query_pinecone, upsert_vectors
 
@@ -85,7 +85,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 6: LangGraph Nodes & Edges ✅ Pending
+### STEP 6: LangGraph Nodes & Edges ✅ COMPLETED
 **Files to create:**
 - `backend/app/graph/edges/routing.py` — route_by_stage, classify_intent, check_message_limit
 - `backend/app/graph/nodes/welcome.py` — welcome_node
@@ -103,7 +103,7 @@ START → route_by_stage (conditional entry)
 
 ---
 
-### STEP 7: Email & Summarization Services ✅ Pending
+### STEP 7: Email & Summarization Services ✅ COMPLETED
 **Files to create:**
 - `backend/app/services/email_service.py` — SMTP async email (admin notification + visitor thank-you)
 - `backend/app/services/summarization.py` — LLM-based lead summary generation
