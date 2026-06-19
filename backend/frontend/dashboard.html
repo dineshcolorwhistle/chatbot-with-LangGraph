@@ -349,6 +349,7 @@
             <button class="sidebar-tab active" data-target="panel-leads">Qualified Leads</button>
             <button class="sidebar-tab" data-target="panel-ingest">Ingest PDF Folder</button>
             <button class="sidebar-tab" data-target="panel-youtube">Ingest YouTube Video</button>
+            <button class="sidebar-tab" data-target="panel-flowchart">Application Flow Chart</button>
         </div>
 
         <div class="main-content">
@@ -399,6 +400,155 @@
                     <button type="submit" class="btn btn-primary">Extract & Ingest</button>
                 </form>
                 <div id="youtube-terminal" class="terminal-box"></div>
+            </div>
+
+            <!-- Flowchart Panel -->
+            <div id="panel-flowchart" class="tab-panel">
+                <h2>Application Process Flow Chart</h2>
+                <p style="color: #9ca3af; font-weight: 300; margin-bottom: 25px; line-height: 1.5;">
+                    Visualize the multi-agent execution path of the lead qualification chatbot. Below is the state machine layout illustrating routing, core conversation logic, guardrails, and final capture stages.
+                </p>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 30px;">
+                    <img src="/widget/app_process_flowchart.png" alt="Application Process Flow Chart" style="max-width: 100%; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);">
+                    <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
+                        <a href="/widget/app_process_flowchart.png" download="app_process_flowchart.png" class="btn btn-primary" style="text-align: center;">
+                            Download Flow Chart Image
+                        </a>
+                        <a href="/widget/app_process_flowchart.png" target="_blank" class="btn btn-outline" style="text-align: center;">
+                            View Full Resolution
+                        </a>
+                    </div>
+                </div>
+
+                <h2 style="margin-top: 40px; margin-bottom: 15px;">Node & Edge Details</h2>
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    <!-- State Machine Nodes -->
+                    <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 20px; overflow-x: auto;">
+                        <h3 style="color: #c084fc; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px;">1. State Machine Nodes</h3>
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; color: #e5e7eb; font-size: 0.95rem; min-width: 600px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">Node Name</th>
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">Type</th>
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">Responsibility / Behavior</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">welcome</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); color: #60a5fa;">Static Entry</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Greets the visitor with an initial friendly message and introduces the chat helper.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">intent_classifier</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); color: #c084fc;">Agent/Router</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Analyzes visitor message intent (off-topic, budget, contact, valid RAG query) to route flow.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">off_topic</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;">Guardrail</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Triggered on irrelevant chatter. Politely redirects the conversation back to the professional context.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">budget_response</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #fbbf24;">Guardrail</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Triggered on cost requests. Explains pricing is customized and shifts toward representative contact collection.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">contact_response</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #fbbf24;">Guardrail</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Triggered on contact requests. Explains how the team works and proactively requests contact details.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">rag_conversation</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #34d399;">Core Agent</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Queries Pinecone DB for relevant business answers, qualifications, and captures lead data models.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">limit_warning</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #f87171;">Guardrail</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Warns the visitor of the message threshold limit (e.g. 10 messages max) and requests final details.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">final_input</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); color: #c084fc;">Agent/Router</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Explicitly forces capturing missing fields (Name, Email, Company) before completion.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 10px; font-weight: 600; font-family: monospace; color: #3b82f6;">completed</td>
+                                    <td style="padding: 12px 10px;"><span class="lead-pill" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #34d399;">Terminal State</span></td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Generates Requirement Blueprint, triggers Email dispatch via SMTP, and saves final lead structure to MongoDB.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- State Transition Edges -->
+                    <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 20px; overflow-x: auto;">
+                        <h3 style="color: #c084fc; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px;">2. State Transition Edges & Logic</h3>
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; color: #e5e7eb; font-size: 0.95rem; min-width: 600px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">From Node</th>
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">To Node</th>
+                                    <th style="padding: 10px; font-weight: 600; color: #a78bfa;">Transition Edge Logic / Condition</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #9ca3af;">[Session Entry]</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">welcome / intent_classifier / final_input / completed</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;"><strong>Conditional Routing (route_by_stage):</strong> Routes new sessions to <code>welcome</code>, active conversations to <code>intent_classifier</code>, limit reached to <code>final_input</code>, and finished leads to <code>completed</code>.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">welcome</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Greets the visitor and returns control to the user client interface.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">intent_classifier</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">off_topic / budget_response / contact_response / rag_conversation</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;"><strong>Conditional Edge (classify_intent):</strong> If classified 'off_topic' &rarr; <code>off_topic</code>; if pricing &rarr; <code>budget_response</code>; if contact request &rarr; <code>contact_response</code>; if valid &rarr; <code>rag_conversation</code>.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">off_topic</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Renders off-topic redirection template and yields back to wait for user text.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">budget_response</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Renders pricing shield template and yields back to wait for user input.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">contact_response</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Renders request nudge text and yields back to wait for user details.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">rag_conversation</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">limit_warning / END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;"><strong>Conditional Edge (check_message_limit):</strong> Checks user message counter. If <code>user_message_count</code> &ge; <code>MAX_USER_MESSAGES</code>, routes to <code>limit_warning</code>. Otherwise, routes to <code>END</code> (normal next step).</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">limit_warning</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Prompts warning and sets stage to <code>final_input</code> for the next interaction.</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">final_input</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">completed</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Captures remaining details, transitions lead stage state to <code>completed</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #3b82f6;">completed</td>
+                                    <td style="padding: 12px 10px; font-family: monospace; color: #ef4444;">END</td>
+                                    <td style="padding: 12px 10px; color: #9ca3af;">Direct transition. Finalizes requirements, sends confirmation mails and saves lead to DB.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
