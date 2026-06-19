@@ -1,0 +1,34 @@
+# Core
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+python-dotenv==1.0.1
+pydantic==2.9.0
+pydantic-settings==2.5.0
+
+# LangGraph
+langgraph==0.4.1
+langchain-core==0.3.0
+
+# MongoDB
+motor==3.6.0
+
+# Pinecone
+pinecone-client==5.0.0
+
+# LLM
+openai==1.50.0
+httpx==0.27.0
+
+# Auth
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Email
+aiosmtplib==3.0.0
+
+# Document Processing
+PyMuPDF==1.24.0
+fpdf2==2.8.0
+
+# YouTube
+youtube-transcript-api==0.6.2
