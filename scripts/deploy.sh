@@ -6,7 +6,7 @@ echo "=========================================="
 echo "🚀 Starting deployment for LangGraph AI Chatbot..."
 echo "=========================================="
 
-PROJECT_DIR="/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com"
+PROJECT_DIR="/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com/chatbot-with-LangGraph"
 BACKEND_DIR="$PROJECT_DIR/backend"
 
 cd "$PROJECT_DIR"
