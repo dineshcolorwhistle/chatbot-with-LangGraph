@@ -1,0 +1,84 @@
+name: Deploy to Staging (aichat-staging)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Staging Server
+    runs-on: ubuntu-latest
+    environment: aichat-staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Validate Python Syntax
+        run: |
+          python -m py_compile backend/app/main.py
+
+      - name: Deploy to Remote Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "=========================================="
+            echo "Deploying Chatbot to Staging..."
+            echo "Target Directory: /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com"
+            echo "=========================================="
+
+            cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com
+
+            echo "--> Fetching and pulling latest code..."
+            git fetch origin
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git pull origin $CURRENT_BRANCH
+
+            echo "--> Checking Python Virtual Environment..."
+            if [ ! -d "venv" ]; then
+              echo "Creating new venv..."
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+
+            echo "--> Installing dependencies..."
+            pip install --upgrade pip
+            pip install -r backend/requirements.txt
+
+            echo "--> Checking environment config..."
+            if [ ! -f "backend/.env" ]; then
+              if [ -f "backend/.env.example" ]; then
+                cp backend/.env.example backend/.env
+                echo "Warning: backend/.env was missing. Copied from backend/.env.example. Update environment variables on server!"
+              fi
+            fi
+
+            echo "--> Restarting FastAPI / Uvicorn service..."
+            if systemctl is-active --quiet aichat-backend 2>/dev/null; then
+              sudo systemctl restart aichat-backend
+              echo "Restarted aichat-backend via systemctl."
+            elif command -v pm2 >/dev/null 2>&1 && pm2 describe aichat-backend >/dev/null 2>&1; then
+              pm2 restart aichat-backend
+              echo "Restarted aichat-backend via pm2."
+            elif command -v supervisorctl >/dev/null 2>&1 && supervisorctl status aichat-backend >/dev/null 2>&1; then
+              sudo supervisorctl restart aichat-backend
+              echo "Restarted aichat-backend via supervisorctl."
+            else
+              echo "Code updated successfully. Please ensure your backend service process is restarted."
+            fi
+
+            echo "=========================================="
+            echo "Deployment Completed Successfully!"
+            echo "=========================================="
