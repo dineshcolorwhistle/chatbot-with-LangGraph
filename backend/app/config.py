@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     LLM_MODEL: str = Field(default="llama3.1", description="LLM model name")
     OLLAMA_BASE_URL: str = Field(default="http://localhost:11434", description="Ollama server base URL")
     OPENAI_API_KEY: Optional[str] = Field(default=None, description="OpenAI API key")
+    CLOUD_API_KEY: Optional[str] = Field(default=None, description="Cloud LLM API key")
+    CLOUD_BASE_URL: Optional[str] = Field(default=None, description="Cloud LLM base URL")
+    CLOUD_MODEL: Optional[str] = Field(default=None, description="Cloud LLM model name")
 
     # ── Embeddings ───────────────────────────────────────────
     EMBEDDING_MODEL: str = Field(default="nomic-embed-text", description="Ollama embedding model name")

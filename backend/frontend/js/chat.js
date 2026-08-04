@@ -131,6 +131,13 @@ class ChatWidget {
                 <!-- Message bubbles added dynamically -->
             </div>
             
+            <div class="chat-collected-data-panel" id="chat-data-panel" style="display: none;">
+                <div class="chat-data-header" id="chat-data-toggle">
+                    <span class="chat-data-arrow">▶</span> Collected Data (<span id="chat-data-count">0</span> fields)
+                </div>
+                <div class="chat-data-body" id="chat-data-body" style="display: none;"></div>
+            </div>
+            
             <div class="chat-widget-footer">
                 <div class="chat-input-wrapper">
                     <input type="text" class="chat-input-field" id="chat-input" placeholder="Type your project details..." autocomplete="off">
@@ -140,6 +147,16 @@ class ChatWidget {
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                     </svg>
                 </button>
+                <div class="chat-options-container" id="chat-options-container" style="display: none;">
+                    <button class="chat-option-btn yes" id="chat-btn-yes">Yes</button>
+                    <button class="chat-option-btn no" id="chat-btn-no">No</button>
+                </div>
+                <div class="chat-limit-form-container" id="chat-limit-form" style="display: none;">
+                    <input type="text" class="chat-input-field" id="chat-limit-name" placeholder="Your Name" autocomplete="name" required style="margin-bottom: 4px;">
+                    <input type="email" class="chat-input-field" id="chat-limit-email" placeholder="Your Email" autocomplete="email" required style="margin-bottom: 4px;">
+                    <textarea class="chat-input-field" id="chat-limit-requirements" placeholder="Additional project details..." rows="3"></textarea>
+                    <button class="chat-option-btn yes" id="chat-limit-submit" style="width: 100%; border: none; margin-top: 6px; padding: 10px;">Submit Details</button>
+                </div>
             </div>
         `;
 
@@ -182,6 +199,34 @@ class ChatWidget {
 
         // Click header exit/force submit
         this.exitBtn.addEventListener("click", () => this.exitSession());
+
+        // Toggle Collected Data Panel
+        const dataToggle = this.container.querySelector("#chat-data-toggle");
+        dataToggle.addEventListener("click", () => {
+            const bodyEl = this.container.querySelector("#chat-data-body");
+            const arrowEl = this.container.querySelector(".chat-data-arrow");
+            if (bodyEl.style.display === "none") {
+                bodyEl.style.display = "block";
+                arrowEl.innerText = "▼";
+            } else {
+                bodyEl.style.display = "none";
+                arrowEl.innerText = "▶";
+            }
+        });
+
+        // Click Yes options
+        const yesBtn = this.container.querySelector("#chat-btn-yes");
+        yesBtn.addEventListener("click", () => this.handleYesOption());
+
+        // Click No options
+        const noBtn = this.container.querySelector("#chat-btn-no");
+        noBtn.addEventListener("click", () => this.handleNoOption());
+
+        // Click Limit form submit
+        const limitSubmitBtn = this.container.querySelector("#chat-limit-submit");
+        if (limitSubmitBtn) {
+            limitSubmitBtn.addEventListener("click", () => this.handleLimitFormSubmit());
+        }
     }
 
     toggleWidget() {
@@ -298,9 +343,18 @@ class ChatWidget {
                 this.addMessageBubble("assistant", data.reply);
                 this.stage = data.stage;
                 
-                // If session is closed, disable input field
-                if (this.stage === "completed") {
+                // Update collected data panel with counts/fields
+                this.updateCollectedDataPanel(data.data_collected);
+
+                // Handle interactive stage options
+                if (this.stage === "final_input") {
+                    this.showYesNoOptions();
+                } else if (this.stage === "completed") {
+                    this.hideLimitForm();
                     this.disableInputField("Session closed. Details saved.");
+                } else {
+                    this.hideYesNoOptions();
+                    this.hideLimitForm();
                 }
             }
 
@@ -308,6 +362,184 @@ class ChatWidget {
             console.error("❌ Widget communication failure:", error);
             this.hideTypingIndicator();
             this.addMessageBubble("assistant", "⚠️ Connection error. Please ensure the backend server is running and try again.");
+        }
+    }
+
+    updateCollectedDataPanel(dataCollected) {
+        if (!dataCollected) return;
+
+        const countEl = this.container.querySelector("#chat-data-count");
+        const bodyEl = this.container.querySelector("#chat-data-body");
+        const panelEl = this.container.querySelector("#chat-data-panel");
+
+        let fields = [];
+        let count = 0;
+
+        const categories = {
+            "personal_info": "Personal Info",
+            "tech_discovery": "Tech Discovery",
+            "scope_pricing": "Scope & Budget"
+        };
+
+        for (const [catKey, catLabel] of Object.entries(categories)) {
+            const catObj = dataCollected[catKey];
+            if (catObj && typeof catObj === 'object') {
+                for (const [fieldKey, val] of Object.entries(catObj)) {
+                    if (val && String(val).trim()) {
+                        count++;
+                        const displayField = fieldKey.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                        fields.push({
+                            label: `${catLabel} - ${displayField}`,
+                            val: String(val).trim()
+                        });
+                    }
+                }
+            }
+        }
+
+        if (count > 0) {
+            panelEl.style.display = "block";
+            countEl.innerText = count;
+
+            bodyEl.innerHTML = fields.map(f => `
+                <div class="chat-data-item">
+                    <span class="chat-data-label">${f.label}:</span>
+                    <span class="chat-data-value">${f.val}</span>
+                </div>
+            `).join('');
+        } else {
+            panelEl.style.display = "none";
+        }
+    }
+
+    showYesNoOptions() {
+        const inputWrapper = this.container.querySelector(".chat-input-wrapper");
+        const sendBtn = this.container.querySelector("#chat-send-btn");
+        const optionsContainer = this.container.querySelector("#chat-options-container");
+
+        inputWrapper.style.display = "none";
+        sendBtn.style.display = "none";
+        optionsContainer.style.display = "flex";
+    }
+
+    hideYesNoOptions() {
+        const inputWrapper = this.container.querySelector(".chat-input-wrapper");
+        const sendBtn = this.container.querySelector("#chat-send-btn");
+        const optionsContainer = this.container.querySelector("#chat-options-container");
+
+        inputWrapper.style.display = "block";
+        sendBtn.style.display = "flex";
+        optionsContainer.style.display = "none";
+    }
+
+    showLimitForm() {
+        const inputWrapper = this.container.querySelector(".chat-input-wrapper");
+        const sendBtn = this.container.querySelector("#chat-send-btn");
+        const optionsContainer = this.container.querySelector("#chat-options-container");
+        const limitForm = this.container.querySelector("#chat-limit-form");
+        const footer = this.container.querySelector(".chat-widget-footer");
+
+        inputWrapper.style.display = "none";
+        sendBtn.style.display = "none";
+        optionsContainer.style.display = "none";
+        limitForm.style.display = "flex";
+        footer.style.flexDirection = "column";
+    }
+
+    hideLimitForm() {
+        const inputWrapper = this.container.querySelector(".chat-input-wrapper");
+        const sendBtn = this.container.querySelector("#chat-send-btn");
+        const optionsContainer = this.container.querySelector("#chat-options-container");
+        const limitForm = this.container.querySelector("#chat-limit-form");
+        const footer = this.container.querySelector(".chat-widget-footer");
+
+        inputWrapper.style.display = "block";
+        sendBtn.style.display = "flex";
+        optionsContainer.style.display = "none";
+        limitForm.style.display = "none";
+        footer.style.flexDirection = "row";
+    }
+
+    resetLimitFormFields() {
+        const nameInput = this.container.querySelector("#chat-limit-name");
+        const emailInput = this.container.querySelector("#chat-limit-email");
+        const reqInput = this.container.querySelector("#chat-limit-requirements");
+        if (nameInput) nameInput.value = "";
+        if (emailInput) emailInput.value = "";
+        if (reqInput) reqInput.value = "";
+    }
+
+    handleYesOption() {
+        this.hideYesNoOptions();
+        this.showLimitForm();
+    }
+
+    async handleLimitFormSubmit() {
+        const nameInput = this.container.querySelector("#chat-limit-name");
+        const emailInput = this.container.querySelector("#chat-limit-email");
+        const reqInput = this.container.querySelector("#chat-limit-requirements");
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const requirements = reqInput.value.trim();
+
+        if (!name || !email) {
+            alert("Please enter both your name and email address.");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+
+        this.hideLimitForm();
+        this.showTypingIndicator();
+
+        const formattedMsg = `Name: ${name}\nEmail: ${email}\nRequirements: ${requirements || 'None provided'}`;
+        
+        // Render a clean user message bubble
+        this.addMessageBubble("user", `Name: ${name}\nEmail: ${email}\nRequirements: ${requirements || 'None provided'}`);
+
+        await this.callChatAPI(formattedMsg);
+    }
+
+    async handleNoOption() {
+        this.hideYesNoOptions();
+        this.hideLimitForm();
+        this.resetLimitFormFields();
+        this.showTypingIndicator();
+        const endpoint = `${this.apiUrl}/api/reset`;
+        const payload = { session_id: this.sessionId, message: "", namespace: this.namespace };
+
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                localStorage.removeItem(this.sessionKey);
+                this.sessionId = this.getOrCreateSessionId();
+                this.msgLog.innerHTML = "";
+                
+                const panelEl = this.container.querySelector("#chat-data-panel");
+                if (panelEl) panelEl.style.display = "none";
+                
+                this.hideTypingIndicator();
+                this.enableInputField();
+                
+                this.isOpen = false;
+                this.container.classList.remove("open");
+                this.fab.classList.remove("open");
+
+                await this.initChatSession();
+            }
+        } catch (e) {
+            console.error("❌ Failed to reset session on No click:", e);
+            this.hideTypingIndicator();
         }
     }
 
@@ -338,6 +570,8 @@ class ChatWidget {
                 
                 // Re-enable input if it was disabled
                 this.enableInputField();
+                this.hideLimitForm();
+                this.resetLimitFormFields();
 
                 // Trigger new welcome message
                 await this.initChatSession();

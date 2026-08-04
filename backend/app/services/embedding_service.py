@@ -18,7 +18,7 @@ class EmbeddingService:
         """
         provider = settings.LLM_PROVIDER.lower()
 
-        if provider == "openai":
+        if provider in ["openai", "cloud"]:
             return await cls._generate_openai_embedding(text)
         elif provider == "ollama":
             return await cls._generate_ollama_embedding(text)
@@ -32,7 +32,8 @@ class EmbeddingService:
             client = LLMService.get_openai_client()
             response = await client.embeddings.create(
                 model=settings.OPENAI_EMBEDDING_MODEL,
-                input=text
+                input=text,
+                dimensions=768  # Match Pinecone index dimension (created with nomic-embed-text)
             )
             return response.data[0].embedding
         except Exception as e:

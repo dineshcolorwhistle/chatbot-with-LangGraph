@@ -56,10 +56,31 @@ workflow.add_conditional_edges(
     }
 )
 
-# Guardrail nodes output template text and end step
-workflow.add_edge("off_topic", END)
-workflow.add_edge("budget_response", END)
-workflow.add_edge("contact_response", END)
+# Guardrail nodes output template text and check message limit
+workflow.add_conditional_edges(
+    "off_topic",
+    check_message_limit,
+    {
+        "limit_warning": "limit_warning",
+        "end": END
+    }
+)
+workflow.add_conditional_edges(
+    "budget_response",
+    check_message_limit,
+    {
+        "limit_warning": "limit_warning",
+        "end": END
+    }
+)
+workflow.add_conditional_edges(
+    "contact_response",
+    check_message_limit,
+    {
+        "limit_warning": "limit_warning",
+        "end": END
+    }
+)
 
 # Main conversation logic checks limit warning after RAG response
 workflow.add_conditional_edges(

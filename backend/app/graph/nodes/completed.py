@@ -17,6 +17,7 @@ async def run_background_summary_and_email(state_dict: dict):
         # Import services dynamically to avoid circular dependencies
         from app.services.summarization import SummarizationService
         from app.services.email_service import EmailService
+        from app.services.llm_service import LLMService
 
         session_id = state_dict["session_id"]
         namespace = state_dict["namespace"]
@@ -28,6 +29,14 @@ async def run_background_summary_and_email(state_dict: dict):
         personal_info = collected_data.personal_info
         
         logger.info(f"🏁 Starting completed workflow for session: '{session_id}'")
+
+        # Check for purchase intent
+        has_purchase_intent = await LLMService.classify_purchase_intent(messages)
+        logger.info(f"🔍 Classified purchase intent for session '{session_id}': {has_purchase_intent}")
+        
+        if not has_purchase_intent:
+            logger.info(f"⚠️ No purchase intent detected for session '{session_id}'. Skipping summary generation and emails.")
+            return
 
         # 1. Generate requirements summary using LLM
         summary = await SummarizationService.generate_lead_summary(messages, collected_data)

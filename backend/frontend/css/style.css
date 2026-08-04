@@ -372,3 +372,144 @@
         transform: translateY(0) scale(1);
     }
 }
+
+/* ==========================================================================
+   Interactive Options & Collected Data Panel Styling
+   ========================================================================== */
+
+/* Yes/No Options Button styling */
+.chat-options-container {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.chat-option-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+}
+
+.chat-option-btn.yes {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    border: none;
+}
+
+.chat-option-btn.yes:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.45);
+}
+
+.chat-option-btn.yes:active {
+    transform: translateY(0);
+}
+
+.chat-option-btn.no {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-option-btn.no:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.chat-option-btn.no:active {
+    transform: translateY(0);
+}
+
+/* Collected Data Panel styling */
+.chat-collected-data-panel {
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+}
+
+.chat-data-header {
+    padding: 10px 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #c084fc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    transition: background 0.2s ease;
+}
+
+.chat-data-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.chat-data-arrow {
+    font-size: 0.65rem;
+    color: #a78bfa;
+    transition: transform 0.2s ease;
+}
+
+.chat-data-body {
+    padding: 12px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.15);
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.chat-data-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding-bottom: 4px;
+}
+
+.chat-data-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.chat-data-label {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.chat-data-value {
+    color: #ffffff;
+    font-weight: 600;
+    text-align: right;
+    max-width: 60%;
+    word-break: break-all;
+}
+
+/* Limit form container */
+.chat-limit-form-container {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.chat-limit-form-container textarea.chat-input-field {
+    min-height: 80px;
+    line-height: 1.4;
+    resize: none;
+    font-family: inherit;
+}
+

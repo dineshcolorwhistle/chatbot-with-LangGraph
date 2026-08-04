@@ -20,9 +20,11 @@ class LLMService:
     def get_openai_client(cls) -> AsyncOpenAI:
         """Lazy load OpenAI Async client."""
         if cls._openai_client is None:
-            if not settings.OPENAI_API_KEY:
-                raise ValueError("OPENAI_API_KEY is not configured in settings.")
-            cls._openai_client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+            api_key = settings.OPENAI_API_KEY or settings.CLOUD_API_KEY
+            base_url = settings.CLOUD_BASE_URL
+            if not api_key:
+                raise ValueError("OPENAI_API_KEY or CLOUD_API_KEY is not configured in settings/environment.")
+            cls._openai_client = AsyncOpenAI(api_key=api_key, base_url=base_url)
         return cls._openai_client
 
     @classmethod
@@ -37,7 +39,7 @@ class LLMService:
         formatted_messages = [{"role": "system", "content": system_prompt}]
         formatted_messages.extend(messages)
 
-        if provider == "openai":
+        if provider in ["openai", "cloud"]:
             return await cls._call_openai(formatted_messages, temperature)
         elif provider == "ollama":
             return await cls._call_ollama(formatted_messages, temperature)
@@ -64,8 +66,12 @@ class LLMService:
             if any("json" in m["content"].lower() for m in messages):
                 response_format = {"type": "json_object"}
 
+            model_name = settings.CLOUD_MODEL or settings.LLM_MODEL
+            if model_name == "qwen2.5:0.5b" or not model_name:
+                model_name = "gpt-4o-mini"
+
             response = await client.chat.completions.create(
-                model=settings.LLM_MODEL,
+                model=model_name,
                 messages=messages, # type: ignore
                 temperature=temperature,
                 response_format=response_format # type: ignore
@@ -132,3 +138,44 @@ class LLMService:
             except Exception as e:
                 logger.error(f"❌ Failed to parse JSON from LLM response: {text}. Error: {e}")
                 return {"response": text, "extracted_data": {}}
+
+    @classmethod
+    async def classify_purchase_intent(cls, messages: List[Dict[str, str]]) -> bool:
+        """
+        Analyzes the chat logs to determine if the user has purchase intent.
+        Purchase intent: interest in creating/discussing project requirements, websites, quotations.
+        """
+        chat_log = []
+        for msg in messages:
+            role = "Visitor" if msg["role"] == "user" else "Consultant"
+            chat_log.append(f"{role}: {msg['content']}")
+        chat_log_str = "\n".join(chat_log)
+
+        system_prompt = (
+            "You are a sales intent classification bot.\n"
+            "Analyze the following chat conversation history between a visitor and a consultant.\n"
+            "Determine if the visitor shows any purchase intent.\n"
+            "\"Purchase intent\" is defined as any interest in:\n"
+            "- Developing or building a project (website, app, SaaS, software, design, etc.)\n"
+            "- Requesting a quotation, pricing estimation, or budget discussion for services\n"
+            "- Discussing project requirements, features, or timeline\n"
+            "- Arranging a follow-up meeting, call, or consultation to discuss collaboration or services\n\n"
+            "Respond with a JSON object containing a single key \"purchase_intent\" with a boolean value (true or false). "
+            "Do not include any conversational greeting, notes, or markdown. Output valid JSON only."
+        )
+
+        try:
+            raw_output = await cls.call_llm_simple(
+                system_prompt=system_prompt,
+                user_message=f"--- CONVERSATION LOGS ---\n{chat_log_str}",
+                temperature=0.0
+            )
+            parsed = cls.clean_json_response(raw_output)
+            val = parsed.get("purchase_intent", False)
+            if isinstance(val, str):
+                return val.lower() == "true"
+            return bool(val)
+        except Exception as e:
+            logger.error(f"❌ Failed to classify purchase intent: {e}")
+            # Default to True on failure to avoid losing a potential lead
+            return True

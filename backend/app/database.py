@@ -5,6 +5,7 @@ Uses Motor (async MongoDB driver) for non-blocking database operations.
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.config import settings
+import certifi
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,12 @@ class Database:
     async def connect(cls):
         """Establish connection to MongoDB on application startup."""
         try:
-            cls.client = AsyncIOMotorClient(settings.MONGODB_URI)
+            cls.client = AsyncIOMotorClient(
+                settings.MONGODB_URI,
+                tls=True,
+                tlsCAFile=certifi.where(),
+                tlsAllowInvalidCertificates=True
+            )
             cls.db = cls.client[settings.MONGODB_DB_NAME]
 
             # Verify connection by pinging the server
