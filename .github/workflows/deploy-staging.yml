@@ -41,10 +41,16 @@ jobs:
 
             cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com
 
-            echo "--> Fetching and pulling latest code..."
-            git fetch origin
-            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-            git pull origin $CURRENT_BRANCH
+            if [ ! -d ".git" ]; then
+              echo "--> Target folder is not a git repository. Initializing git..."
+              git init
+              git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git || git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            fi
+
+            echo "--> Fetching and resetting to latest main code..."
+            git fetch origin main
+            git checkout -B main origin/main
+            git reset --hard origin/main
 
             echo "--> Checking Python Virtual Environment..."
             if [ ! -d "venv" ]; then
