@@ -33,62 +33,50 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT || 22 }}
           script_stop: true
+          envs: GITHUB_TOKEN,GITHUB_REPOSITORY
           script: |
-            echo "=========================================="
-            echo "Deploying Chatbot to Staging..."
-            echo "Target Directory: /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com"
-            echo "=========================================="
+            set -e
 
-            cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com
+            PROJECT_DIR="/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com/chatbot-with-LangGraph"
 
-            echo "--> Marking directory as safe for git..."
-            git config --global --add safe.directory /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com || true
+            echo "➡️ Switching to project directory: $PROJECT_DIR"
+            cd "$PROJECT_DIR"
+
+            echo "➡️ Marking directory as safe for git..."
+            git config --global --add safe.directory "$PROJECT_DIR" || true
             git config --global init.defaultBranch main || true
 
             if [ ! -d ".git" ]; then
-              echo "--> Target folder is not a git repository. Initializing git..."
+              echo "📦 Initializing git repository..."
               git init -b main
-              git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git || git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             fi
 
-            echo "--> Fetching and resetting to latest main code..."
+            echo "🔄 Setting git remote origin URL..."
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git 2>/dev/null || git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+            echo "🔄 Force updating code..."
             git fetch origin main
-            git checkout -B main origin/main
             git reset --hard origin/main
+            git clean -fd
 
-            echo "--> Checking Python Virtual Environment..."
-            if [ ! -d "venv" ]; then
-              echo "Creating new venv..."
-              python3 -m venv venv
-            fi
-            source venv/bin/activate
-
-            echo "--> Installing dependencies..."
-            pip install --upgrade pip
-            pip install -r backend/requirements.txt
-
-            echo "--> Checking environment config..."
-            if [ ! -f "backend/.env" ]; then
-              if [ -f "backend/.env.example" ]; then
-                cp backend/.env.example backend/.env
-                echo "Warning: backend/.env was missing. Copied from backend/.env.example. Update environment variables on server!"
+            if [ -f "scripts/deploy.sh" ]; then
+              echo "🚀 Executing scripts/deploy.sh..."
+              bash scripts/deploy.sh
+            else
+              echo "⚙️ Setting up backend..."
+              cd backend
+              if [ ! -d "venv" ]; then
+                python3 -m venv venv
+              fi
+              source venv/bin/activate
+              pip install --upgrade pip
+              pip install -r requirements.txt
+              
+              if systemctl is-active --quiet aichat 2>/dev/null; then
+                sudo systemctl restart aichat
+              elif systemctl is-active --quiet aichat-backend 2>/dev/null; then
+                sudo systemctl restart aichat-backend
               fi
             fi
 
-            echo "--> Restarting FastAPI / Uvicorn service..."
-            if systemctl is-active --quiet aichat-backend 2>/dev/null; then
-              sudo systemctl restart aichat-backend
-              echo "Restarted aichat-backend via systemctl."
-            elif command -v pm2 >/dev/null 2>&1 && pm2 describe aichat-backend >/dev/null 2>&1; then
-              pm2 restart aichat-backend
-              echo "Restarted aichat-backend via pm2."
-            elif command -v supervisorctl >/dev/null 2>&1 && supervisorctl status aichat-backend >/dev/null 2>&1; then
-              sudo supervisorctl restart aichat-backend
-              echo "Restarted aichat-backend via supervisorctl."
-            else
-              echo "Code updated successfully. Please ensure your backend service process is restarted."
-            fi
-
-            echo "=========================================="
-            echo "Deployment Completed Successfully!"
-            echo "=========================================="
+            echo "🎉 Deployment completed successfully!"
