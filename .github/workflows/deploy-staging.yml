@@ -41,9 +41,13 @@ jobs:
 
             cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com
 
+            echo "--> Marking directory as safe for git..."
+            git config --global --add safe.directory /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com || true
+            git config --global init.defaultBranch main || true
+
             if [ ! -d ".git" ]; then
               echo "--> Target folder is not a git repository. Initializing git..."
-              git init
+              git init -b main
               git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git || git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             fi
 
