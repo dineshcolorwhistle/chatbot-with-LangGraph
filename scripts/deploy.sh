@@ -61,12 +61,17 @@ fi
 SERVICE_NAME="aichat-backend"
 echo "🔁 Restarting backend service ($SERVICE_NAME)..."
 
+SUDO_CMD=""
+if [ "$(id -u)" -ne 0 ]; then
+  SUDO_CMD="sudo -n"
+fi
+
 if systemctl list-unit-files | grep -q "$SERVICE_NAME.service"; then
-  sudo systemctl restart "$SERVICE_NAME"
+  $SUDO_CMD systemctl restart "$SERVICE_NAME" 2>/dev/null || systemctl restart "$SERVICE_NAME" 2>/dev/null || sudo systemctl restart "$SERVICE_NAME"
   sleep 2
   if ! systemctl is-active --quiet "$SERVICE_NAME"; then
     echo "❌ Backend failed to restart ($SERVICE_NAME)"
-    journalctl -u "$SERVICE_NAME" -n 50 --no-pager
+    $SUDO_CMD journalctl -u "$SERVICE_NAME" -n 50 --no-pager 2>/dev/null || journalctl -u "$SERVICE_NAME" -n 50 --no-pager
     exit 1
   fi
   echo "✅ Service $SERVICE_NAME is running"
@@ -74,7 +79,7 @@ elif command -v pm2 >/dev/null 2>&1 && pm2 describe "$SERVICE_NAME" >/dev/null 2
   pm2 restart "$SERVICE_NAME"
   echo "✅ Restarted via PM2 ($SERVICE_NAME)"
 elif command -v supervisorctl >/dev/null 2>&1 && supervisorctl status "$SERVICE_NAME" >/dev/null 2>&1; then
-  sudo supervisorctl restart "$SERVICE_NAME"
+  $SUDO_CMD supervisorctl restart "$SERVICE_NAME" 2>/dev/null || supervisorctl restart "$SERVICE_NAME"
   echo "✅ Restarted via Supervisor ($SERVICE_NAME)"
 else
   echo "⚠️ Code updated. Please ensure systemd service '$SERVICE_NAME' is created and running."
