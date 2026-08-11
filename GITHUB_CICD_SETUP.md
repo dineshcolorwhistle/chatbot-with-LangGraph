@@ -7,7 +7,8 @@ This guide explains how the GitHub Actions CI/CD deployment pipeline works for t
 ## 1. Environment & Target Server Details
 
 - **GitHub Deployment Environment**: `aichat-staging`
-- **Target Server Remote Path**: `/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com`
+- **Target Server Remote Path**: `/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com/chatbot-with-LangGraph`
+- **Backend Service Port**: `8020`
 - **Workflow File**: [`.github/workflows/deploy-staging.yml`](file:///d:/Projects/chatbot-with-LangGraph/.github/workflows/deploy-staging.yml)
 
 ---
@@ -34,7 +35,7 @@ Ensure the following secrets are added to your GitHub repository (**Settings** >
 
 ## 3. Server Setup Requirements
 
-Make sure the server `/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com` meets the following criteria:
+Make sure the server `/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com/chatbot-with-LangGraph` meets the following criteria:
 
 1. **Public Key Authorized**:
    The public key corresponding to `SSH_KEY` must be added to `/home/agentwhistle-aichat-langgraph/.ssh/authorized_keys` on the server:
@@ -46,12 +47,12 @@ Make sure the server `/home/agentwhistle-aichat-langgraph/htdocs/aichat-langgrap
 2. **Git Repository Initialized**:
    Ensure the folder on the server is cloned from GitHub:
    ```bash
-   cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com
+   cd /home/agentwhistle-aichat-langgraph/htdocs/aichat-langgraph.agentwhistle.com/chatbot-with-LangGraph
    git remote -v
    ```
 
 3. **Backend `.env` File**:
-   Ensure `backend/.env` exists on the server with production/staging credentials (MongoDB URI, Pinecone API Key, OpenAI/Ollama settings, SMTP credentials, JWT secret, etc.).
+   Ensure `backend/.env` exists on the server with production/staging credentials (`APP_PORT=8020`, MongoDB URI, Pinecone API Key, OpenAI/Ollama settings, SMTP credentials, JWT secret, etc.).
 
 ---
 

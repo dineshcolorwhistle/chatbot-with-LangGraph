@@ -77,9 +77,9 @@ pip install -r requirements.txt
 Run the FastAPI application in your terminal using the Python module execution syntax (recommended on Windows where Uvicorn might not be on system PATH):
 ```bash
 cd backend
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8020 --reload
 ```
-This will automatically connect to MongoDB, seed the Super Admin credentials configured in your `.env` file, and start listening on port 8000.
+This will automatically connect to MongoDB, seed the Super Admin credentials configured in your `.env` file, and start listening on port 8020.
 
 ---
 
@@ -87,12 +87,12 @@ This will automatically connect to MongoDB, seed the Super Admin credentials con
 
 FastAPI automatically generates interactive API documentation and test clients for all endpoints:
 
-* **Interactive Admin UI (Swagger Docs)**: [http://localhost:8000/docs](http://localhost:8000/docs)  
+* **Interactive Admin UI (Swagger Docs)**: [http://localhost:8020/docs](http://localhost:8020/docs)  
   *(Click the **Authorize** button in the top-right corner, enter your configured Admin credentials to authenticate, and run file/YouTube ingestions directly from your browser!)*
-* **ReDoc Reference Docs**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-* **Authentication Endpoint**: `http://localhost:8000/api/auth/login` (POST)
-* **Document Ingestion Endpoint**: `http://localhost:8000/api/admin/ingest` (POST)
-* **YouTube Extraction Endpoint**: `http://localhost:8000/api/admin/extract-youtube` (POST)
+* **ReDoc Reference Docs**: [http://localhost:8020/redoc](http://localhost:8020/redoc)
+* **Authentication Endpoint**: `http://localhost:8020/api/auth/login` (POST)
+* **Document Ingestion Endpoint**: `http://localhost:8020/api/admin/ingest` (POST)
+* **YouTube Extraction Endpoint**: `http://localhost:8020/api/admin/extract-youtube` (POST)
 
 ---
 
@@ -105,13 +105,13 @@ You can populate your vector store namespaces with custom training documents (PD
 1. Place PDF files under the `backend/documents/` folder.
 2. Login to retrieve your Admin JWT:
    ```bash
-   curl -X POST http://localhost:8000/api/auth/login \
+   curl -X POST http://localhost:8020/api/auth/login \
      -H "Content-Type: application/json" \
      -d '{"email":"admin@example.com","password":"admin123"}'
    ```
 3. Trigger folder ingestion under a namespace:
    ```bash
-   curl -X POST http://localhost:8000/api/admin/ingest \
+   curl -X POST http://localhost:8020/api/admin/ingest \
      -H "Authorization: Bearer <your-jwt-token>" \
      -H "Content-Type: application/json" \
      -d '{"namespace":"colorwhistle"}'
@@ -120,7 +120,7 @@ You can populate your vector store namespaces with custom training documents (PD
 ### Ingesting YouTube Transcripts
 Provide a video link and namespace, and the backend will extract transcripts, generate a PDF reference doc, embed the segments, and upsert them to Pinecone:
 ```bash
-curl -X POST http://localhost:8000/api/admin/extract-youtube \
+curl -X POST http://localhost:8020/api/admin/extract-youtube \
   -H "Authorization: Bearer <your-jwt-token>" \
   -H "Content-Type: application/json" \
   -d '{"video_url":"https://www.youtube.com/watch?v=VIDEO_ID", "namespace":"colorwhistle"}'
@@ -130,8 +130,8 @@ curl -X POST http://localhost:8000/api/admin/extract-youtube \
 
 ## Running the Widget Demo
 
-With the backend running on port 8000:
-1. Open your browser and navigate to `http://localhost:8000/widget/index.html`.
+With the backend running on port 8020:
+1. Open your browser and navigate to `http://localhost:8020/widget/index.html`.
 2. Click the floating chat bubble in the bottom right corner to toggle the premium consultant widget.
 3. Chat with the agent, test guardrails (weather queries, budget estimations), and complete lead discovery.
 
@@ -145,8 +145,8 @@ You can embed this glassmorphic lead qualification chatbot widget into any exter
 
 ```html
 <script 
-  src="http://YOUR_BACKEND_HOST:8000/widget/js/chat.js"
-  data-api-url="http://YOUR_BACKEND_HOST:8000"
+  src="http://YOUR_BACKEND_HOST:8020/widget/js/chat.js"
+  data-api-url="http://YOUR_BACKEND_HOST:8020"
   data-namespace="colorwhistle"
   data-company-name="ColorWhistle"
   data-logo-url="https://colorwhistle.com/logo.svg"
@@ -155,7 +155,7 @@ You can embed this glassmorphic lead qualification chatbot widget into any exter
 ```
 
 ### Configurable Script Attributes:
-*   `data-api-url`: The root URL of your running backend FastAPI server (e.g., `http://localhost:8000` or `https://your-chatbot-api.com`). This is used to dynamically fetch assets and send API payloads.
+*   `data-api-url`: The root URL of your running backend FastAPI server (e.g., `http://localhost:8020` or `https://your-chatbot-api.com`). This is used to dynamically fetch assets and send API payloads.
 *   `data-namespace`: The specific Pinecone vector store namespace (e.g. `colorwhistle`). Leads and RAG details are partition-isolated under this value.
 *   `data-company-name` (Optional): The company name displayed in the chatbot header (e.g., `ColorWhistle Consultant`).
 *   `data-logo-url` (Optional): The absolute URL of your logo to render as the chatbot avatar (replaces the default `🤖`).
