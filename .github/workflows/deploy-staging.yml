@@ -72,9 +72,7 @@ jobs:
               pip install --upgrade pip
               pip install -r requirements.txt
               
-              if systemctl is-active --quiet aichat 2>/dev/null; then
-                sudo systemctl restart aichat
-              elif systemctl is-active --quiet aichat-backend 2>/dev/null; then
+              if systemctl list-unit-files | grep -q "aichat-backend.service"; then
                 sudo systemctl restart aichat-backend
               fi
             fi

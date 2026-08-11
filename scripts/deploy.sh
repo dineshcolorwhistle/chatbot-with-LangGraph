@@ -58,18 +58,10 @@ fi
 # -----------------------
 # Restart Backend Service
 # -----------------------
-echo "🔁 Restarting backend service..."
+SERVICE_NAME="aichat-backend"
+echo "🔁 Restarting backend service ($SERVICE_NAME)..."
 
-SERVICE_NAME=""
-if systemctl is-active --quiet aichat 2>/dev/null; then
-  SERVICE_NAME="aichat"
-elif systemctl is-active --quiet aichat-backend 2>/dev/null; then
-  SERVICE_NAME="aichat-backend"
-elif systemctl is-active --quiet aichat-langgraph 2>/dev/null; then
-  SERVICE_NAME="aichat-langgraph"
-fi
-
-if [ -n "$SERVICE_NAME" ]; then
+if systemctl list-unit-files | grep -q "$SERVICE_NAME.service"; then
   sudo systemctl restart "$SERVICE_NAME"
   sleep 2
   if ! systemctl is-active --quiet "$SERVICE_NAME"; then
@@ -78,14 +70,14 @@ if [ -n "$SERVICE_NAME" ]; then
     exit 1
   fi
   echo "✅ Service $SERVICE_NAME is running"
-elif command -v pm2 >/dev/null 2>&1 && pm2 describe aichat-backend >/dev/null 2>&1; then
-  pm2 restart aichat-backend
-  echo "✅ Restarted via PM2"
-elif command -v supervisorctl >/dev/null 2>&1 && supervisorctl status aichat-backend >/dev/null 2>&1; then
-  sudo supervisorctl restart aichat-backend
-  echo "✅ Restarted via Supervisor"
+elif command -v pm2 >/dev/null 2>&1 && pm2 describe "$SERVICE_NAME" >/dev/null 2>&1; then
+  pm2 restart "$SERVICE_NAME"
+  echo "✅ Restarted via PM2 ($SERVICE_NAME)"
+elif command -v supervisorctl >/dev/null 2>&1 && supervisorctl status "$SERVICE_NAME" >/dev/null 2>&1; then
+  sudo supervisorctl restart "$SERVICE_NAME"
+  echo "✅ Restarted via Supervisor ($SERVICE_NAME)"
 else
-  echo "⚠️ Code updated. Please ensure your backend service process is restarted."
+  echo "⚠️ Code updated. Please ensure systemd service '$SERVICE_NAME' is created and running."
 fi
 
 echo "=========================================="
