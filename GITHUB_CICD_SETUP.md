@@ -77,3 +77,64 @@ The deployment script automatically attempts to restart your FastAPI backend ser
 - **Supervisor**: `supervisorctl restart aichat-backend`
 
 If a custom service name or command is used, edit [`.github/workflows/deploy-staging.yml`](file:///d:/Projects/chatbot-with-LangGraph/.github/workflows/deploy-staging.yml) line 63-71 to match your server configuration.
+
+---
+
+## 6. Nginx Reverse Proxy Configuration (Port 8020)
+
+Recommended Nginx server block for `aichat-langgraph.agentwhistle.com` routing to backend port `8020`:
+
+```nginx
+server {
+  listen 80;
+  listen [::]:80;
+  listen 443 ssl;
+  listen [::]:443 ssl;
+  http2 on;
+  
+  server_name aichat-langgraph.agentwhistle.com;
+
+  if ($scheme != "https") {
+    rewrite ^ https://$host$request_uri permanent;
+  }
+
+  location ~ /.well-known {
+    auth_basic off;
+    allow all;
+  }
+
+  include /etc/nginx/global_settings;
+
+  # Main proxy to FastAPI application on port 8020
+  location / {
+    proxy_pass http://127.0.0.1:8020;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_connect_timeout 900;
+    proxy_send_timeout 900;
+    proxy_read_timeout 900;
+  }
+
+  # Proxy static assets through FastAPI static directory mount
+  location ~* ^.+\.(css|js|jpg|jpeg|gif|png|ico|gz|svg|svgz|ttf|otf|woff|woff2|eot|mp4|ogg|ogv|webm|webp|zip|swf)$ {
+    proxy_pass http://127.0.0.1:8020;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    add_header Access-Control-Allow-Origin "*";
+    expires 30d;
+    access_log off;
+  }
+
+  if (-f $request_filename) {
+    break;
+  }
+}
+```
