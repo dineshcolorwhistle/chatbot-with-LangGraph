@@ -1,4 +1,4 @@
-name: Deploy to Staging (aichat-staging)
+name: Deploy to agentwhistle (aichat-staging)
 
 on:
   push:
