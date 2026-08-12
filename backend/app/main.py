@@ -75,3 +75,12 @@ app.include_router(admin.router)
 async def root():
     """Redirect root endpoint to frontend widget index.html."""
     return RedirectResponse(url="/widget/index.html")
+
+
+@app.get("/api/config")
+async def get_config():
+    """Return public frontend configuration (e.g., API domain URL from .env)."""
+    return {
+        "apiUrl": settings.APP_DOMAIN.rstrip("/") if settings.APP_DOMAIN else ""
+    }
+

@@ -43,7 +43,10 @@ class ChatWidget {
             this.apiUrl = this.apiUrl.replace(/\/$/, "");
         }
 
-        // 4. Dynamically append the CSS stylesheet link if missing
+        // 4. If no API URL provided, fetch it from backend /api/config endpoint
+        this.configLoaded = this.apiUrl ? Promise.resolve() : this.loadConfigFromServer();
+
+        // 5. Dynamically append the CSS stylesheet link if missing
         if (this.apiUrl) {
             const cssUrl = `${this.apiUrl}/widget/css/style.css`;
             if (!document.querySelector(`link[href="${cssUrl}"]`)) {
@@ -54,22 +57,36 @@ class ChatWidget {
             }
         }
 
-        // 5. Setup Session ID (UUID)
+        // 6. Setup Session ID (UUID)
         this.sessionKey = `ai_chat_session_id_${this.namespace}`;
         this.sessionId = this.getOrCreateSessionId();
 
-        // 6. Setup state variables
+        // 7. Setup state variables
         this.isOpen = false;
         this.isTyping = false;
         this.messages = [];
         this.stage = "welcome";
 
-        // 7. Initialize DOM and bind events
+        // 8. Initialize DOM and bind events
         this.buildWidgetDOM();
         this.bindEvents();
         
-        // 8. Trigger welcome message if session is active or empty
+        // 9. Trigger welcome message if session is active or empty
         this.initChatSession();
+    }
+
+    async loadConfigFromServer() {
+        try {
+            const response = await fetch("/api/config");
+            if (response.ok) {
+                const config = await response.json();
+                if (config.apiUrl) {
+                    this.apiUrl = config.apiUrl.replace(/\/$/, "");
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Could not load /api/config, using relative URLs:", e);
+        }
     }
 
     getOrCreateSessionId() {
@@ -294,6 +311,8 @@ class ChatWidget {
     }
 
     async initChatSession() {
+        // Wait for API URL config to be loaded from server (if needed)
+        await this.configLoaded;
         // Check if messages already exist in DOM, if empty fetch welcome init
         if (this.msgLog.children.length === 0) {
             await this.callChatAPI("");

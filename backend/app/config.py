@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     All values are loaded from the .env file or environment variables.
     """
 
+    # ── Application ──────────────────────────────────────────
+    APP_DOMAIN: str = Field(default="", description="Public domain URL for frontend API calls (e.g. https://aichat-langgraph.agentwhistle.com). Leave empty for relative URLs.")
+
     # ── MongoDB ──────────────────────────────────────────────
     MONGODB_URI: str = Field(default="mongodb://localhost:27017", description="MongoDB connection URI")
     MONGODB_DB_NAME: str = Field(default="chatbot_langgraph", description="MongoDB database name")
