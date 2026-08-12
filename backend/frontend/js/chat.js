@@ -6,9 +6,9 @@
  */
 
 class ChatWidget {
-    constructor(elementId) {
-        // 1. Read attributes from document.currentScript (if loaded via script element)
-        const currentScript = document.currentScript;
+    constructor(elementId, scriptElement) {
+        // 1. Read attributes from the script element (passed in since document.currentScript is null in DOMContentLoaded)
+        const currentScript = scriptElement || document.currentScript;
         let scriptApiUrl = "";
         let scriptNamespace = "";
         let scriptCompanyName = "";
@@ -21,6 +21,7 @@ class ChatWidget {
             scriptCompanyName = currentScript.getAttribute("data-company-name") || "";
             scriptLogoUrl = currentScript.getAttribute("data-logo-url") || "";
             scriptPosition = currentScript.getAttribute("data-position") || "";
+            this._scriptSrc = currentScript.getAttribute("src") || "";
         }
 
         // 2. Locate or dynamically create the widget wrapper element
@@ -77,7 +78,18 @@ class ChatWidget {
 
     async loadConfigFromServer() {
         try {
-            const response = await fetch("/api/config");
+            // Derive backend base URL from the script's own src attribute
+            // e.g., "https://aichat-langgraph.agentwhistle.com/widget/js/chat.js" → "https://aichat-langgraph.agentwhistle.com"
+            let configUrl = "/api/config";
+            if (this._scriptSrc) {
+                const scriptUrl = new URL(this._scriptSrc);
+                const baseUrl = scriptUrl.origin;
+                configUrl = `${baseUrl}/api/config`;
+                // Also set apiUrl from the script origin as a fallback
+                this.apiUrl = baseUrl;
+            }
+
+            const response = await fetch(configUrl);
             if (response.ok) {
                 const config = await response.json();
                 if (config.apiUrl) {
@@ -85,7 +97,7 @@ class ChatWidget {
                 }
             }
         } catch (e) {
-            console.warn("⚠️ Could not load /api/config, using relative URLs:", e);
+            console.warn("⚠️ Could not load /api/config, using script origin as API URL:", e);
         }
     }
 
@@ -649,7 +661,11 @@ class ChatWidget {
     }
 }
 
+// Capture currentScript reference immediately during script execution
+// (document.currentScript is null inside DOMContentLoaded handlers)
+const _chatWidgetScript = document.currentScript;
+
 // Instantiate widget on load
 document.addEventListener("DOMContentLoaded", () => {
-    window.aiChatWidgetInstance = new ChatWidget("ai-chat-widget");
+    window.aiChatWidgetInstance = new ChatWidget("ai-chat-widget", _chatWidgetScript);
 });
